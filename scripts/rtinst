@@ -72,10 +72,6 @@ else
 fi
 echo
 echo "FTP Port set to $ftpport"
-echo
-echo "IMPORTANT - SSH Port has been set to: $sshport"
-echo "IMPORTANT - SSH Port has been set to: $sshport"
-echo "IMPORTANT - SSH Port has been set to: $sshport"
 exit 1
 }
 
@@ -268,7 +264,6 @@ dlflag=1
 portdefault=1
 
 skip_rt=1
-sshport=''
 rudevflag=1
 rurelease=master
 passfile='/etc/nginx/.htpasswd'
@@ -640,17 +635,6 @@ sed -i '$ i\* hard nofile 32768\n* soft nofile 16384' /etc/security/limits.conf
 
 echo "Configuring SSH" | tee -a $logfile
 
-oldsshport=$(grep -P '^[#\s]*Port ' /etc/ssh/sshd_config | sed 's/[^0-9]*//g')
-
-if [ "$portdefault" = "0" ]; then
-  sshport=22
-elif [ "$oldsshport" = "22" ] && [ "$portdefault" = "1" ]; then
-  sshport=$(random 21000 29000)
-else
-  sshport=$oldsshport
-fi
-
-sed -i "/^\(\s\|#\)*Port / c\Port $sshport" /etc/ssh/sshd_config
 sed -i "/^\(\s\|#\)*X11Forwarding /c\X11Forwarding no" /etc/ssh/sshd_config
 sed -i '/^\s*PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
 sed -i '/^\s*PasswordAuthentication no/ c\#PasswordAuthentication no' /etc/ssh/sshd_config
@@ -676,8 +660,6 @@ fi
 grep "AllowGroups sudo sshuser" /etc/ssh/sshd_config > /dev/null || echo "AllowGroups sudo sshuser" >> /etc/ssh/sshd_config
 
 service ssh restart 1>> $logfile
-sshport=$(grep 'Port ' /etc/ssh/sshd_config | sed 's/[^0-9]*//g')
-echo "SSH port set to $sshport"
 
 ###############################
 ### SSL CERTIFICATES ###
@@ -1004,7 +986,6 @@ echo "Summary of Installation (Important Information, please read" | tee $home/r
 echo | tee $home/rtinst.info
 
 echo "SSH Configured" | tee -a $home/rtinst.info
-echo "   SSH port set to $sshport" | tee -a $home/rtinst.info
 echo "   root login directly from SSH disabled"
 echo "   login with $user and switch to root using: sudo su"
 
@@ -1062,9 +1043,6 @@ fi
 
 echo | tee -a $home/rtinst.info
 
-echo "IMPORTANT: SSH Port set to $sshport" | tee -a $home/rtinst.info
-echo "IMPORTANT: SSH Port set to $sshport"
-echo "IMPORTANT: SSH Port set to $sshport"
 echo "Please ensure you can login BEFORE closing this session"
 echo
 echo "The above information is stored in rtinst.info in your home directory."
